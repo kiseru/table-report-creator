@@ -1,0 +1,193 @@
+package ru.kiseru.tablereportcreator
+
+fun main() {
+    val report = createReport {
+        setTitle("Some cool report")
+
+        createTable(11, 11, 11, 11, 11) {
+            setTitle("Some cool table header")
+
+            setHeaders("Column #1", "Column #2", "Column #3", "Column #4", "Column #5")
+
+            data(
+                listOf("Hello", "World", "How", "Are", "You"),
+            )
+        }
+
+        createTable(8, 14) {
+            setTitle("Employees phones")
+
+            setHeaders("Name", "Phone")
+
+            data(
+                listOf("Sam", "+79260243421"),
+                listOf("Max", "+79235453523"),
+                listOf("Anna", "+79138593428"),
+                listOf("Daniel", "+79132490565"),
+                listOf("Megan", "+79875490432"),
+                listOf("Julia", "+79859430534"),
+            )
+        }
+    }
+
+    println(report)
+}
+
+fun createReport(func: ReportCreator.() -> Unit): String {
+    val reportCreator = ReportCreator()
+    reportCreator.func()
+    return reportCreator.createReport()
+}
+
+class ReportCreator {
+
+    private val stringBuilder = StringBuilder()
+
+    private var isTitleSet = false
+
+    fun setTitle(title: String) {
+        if (isTitleSet) {
+            throw IllegalStateException("Report header is already set")
+        }
+
+        isTitleSet = true
+        stringBuilder.appendLine(" $title")
+    }
+
+    fun createTable(vararg columnSizes: Int, func: ReportTableCreator.() -> Unit) {
+        stringBuilder.appendLine()
+        val reportTableCreator = ReportTableCreator(stringBuilder, *columnSizes)
+        reportTableCreator.func()
+    }
+
+    fun createReport(): String =
+        stringBuilder.toString()
+}
+
+class ReportTableCreator(
+    private val stringBuilder: StringBuilder,
+    private vararg val columnSizes: Int,
+) {
+
+    private val columnsCount = columnSizes.size
+
+    private var isTitleSet = false
+    private var isHeaderSet = false
+    private var isDataSet = false
+
+    fun setTitle(title: String) {
+        if (isTitleSet) {
+            throw IllegalStateException("Table title is already set")
+        }
+
+        if (isHeaderSet) {
+            throw IllegalStateException("Table headers is already set")
+        }
+
+        if (isDataSet) {
+            throw IllegalStateException("Table data is already set")
+        }
+
+        isTitleSet = true
+        stringBuilder.appendLine(" $title")
+        writeUpLine()
+    }
+
+    fun setHeaders(vararg headers: String) {
+        if (isHeaderSet) {
+            throw IllegalStateException("Table headers is already set")
+        }
+
+        if (isDataSet) {
+            throw IllegalStateException("Table data is already set")
+        }
+
+        isHeaderSet = true
+        writeHeaderRow(*headers)
+        writeMiddleLine()
+    }
+
+    fun data(vararg data: List<String>) {
+        if (isDataSet) {
+            throw IllegalStateException("Table data is already set")
+        }
+
+        isDataSet = true
+        data.forEach(::writeRow)
+        writeDownLine()
+    }
+
+    private fun writeRow(data: List<String>) {
+        if (data.size != columnsCount) {
+            throw IllegalArgumentException("The table have $columnsCount columns.")
+        }
+
+        stringBuilder.append("│")
+        columnSizes.zip(data)
+            .forEach { (columnSize, columnValue) ->
+                if (columnSize - 2 < columnValue.length) {
+                    stringBuilder.append(" ${columnValue.substring(0, columnSize - 2)}")
+                } else {
+                    stringBuilder.append(" ${columnValue.padEnd(columnSize - 2)}")
+                }
+                stringBuilder.append(" │")
+            }
+        stringBuilder.appendLine()
+    }
+
+    private fun writeHeaderRow(vararg data: String) {
+        if (data.size != columnsCount) {
+            throw IllegalArgumentException("The table have $columnsCount columns.")
+        }
+
+        stringBuilder.append("│")
+        columnSizes.zip(data)
+            .forEach { (columnSize, columnValue) ->
+                if (columnSize - 2 < columnValue.length) {
+                    stringBuilder.append(" ${columnValue.substring(0, columnSize - 2)} │")
+                } else {
+                    val gapSize = columnSize - columnValue.length
+                    val gap = generateSequence { " " }
+                        .take(gapSize / 2)
+                        .joinToString(separator = "")
+                    stringBuilder.append("$gap$columnValue$gap")
+                    if (gapSize % 2 != 0) {
+                        stringBuilder.append(" ")
+                    }
+                    stringBuilder.append("│")
+                }
+            }
+        stringBuilder.appendLine()
+    }
+
+    private fun writeUpLine() {
+        writeLine("┌", "┬", "┐")
+    }
+
+    private fun writeMiddleLine() {
+        writeLine("├", "┼", "┤")
+    }
+
+    private fun writeDownLine() {
+        writeLine("└", "┴", "┘")
+    }
+
+    private fun writeLine(startSymbol: String, middleSymbol: String, endSymbol: String) {
+        stringBuilder.append(startSymbol)
+        columnSizes.forEachIndexed { index, size ->
+            if (index > 0) {
+                stringBuilder.append(middleSymbol)
+            }
+            val line = generateSequence { "─" }
+                .take(size)
+                .joinToString(separator = "")
+            stringBuilder.append(line)
+        }
+        stringBuilder.appendLine(endSymbol)
+    }
+}
+
+
+
+
+
