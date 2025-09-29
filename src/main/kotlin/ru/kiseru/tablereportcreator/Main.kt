@@ -1,14 +1,20 @@
 package ru.kiseru.tablereportcreator
 
-fun createReport(func: ReportCreator.() -> Unit): String {
-    val reportCreator = ReportCreator()
-    reportCreator.func()
-    return reportCreator.createReport()
+import java.io.OutputStream
+import java.io.Writer
+
+fun createReport(outputStream: OutputStream, func: ReportCreator.() -> Unit) {
+    val writer = outputStream.bufferedWriter()
+    createReport(writer, func)
+    writer.flush()
 }
 
-class ReportCreator {
+fun createReport(writer: Writer, func: ReportCreator.() -> Unit) {
+    val reportCreator = ReportCreator(writer)
+    reportCreator.func()
+}
 
-    private val stringBuilder = StringBuilder()
+class ReportCreator(private val writer: Writer) {
 
     private var isTitleSet = false
     private var isTablesCreated = false
@@ -23,27 +29,24 @@ class ReportCreator {
         }
 
         isTitleSet = true
-        stringBuilder.appendLine(" $title")
+        writer.write(" $title\n")
     }
 
     fun createTable(vararg columnSizes: Int, func: ReportTableCreator.() -> Unit) {
         isTablesCreated = true
 
         if (isTitleSet) {
-            stringBuilder.appendLine()
+            writer.write("\n")
         }
 
-        val reportTableCreator = ReportTableCreator(stringBuilder, *columnSizes)
+        val reportTableCreator = ReportTableCreator(writer, *columnSizes)
         reportTableCreator.func()
         reportTableCreator.writeDownLine()
     }
-
-    fun createReport(): String =
-        stringBuilder.toString()
 }
 
 class ReportTableCreator(
-    private val stringBuilder: StringBuilder,
+    private val writer: Writer,
     private vararg val columnSizes: Int,
 ) {
 
@@ -67,7 +70,7 @@ class ReportTableCreator(
         }
 
         isTitleSet = true
-        stringBuilder.appendLine(" $title")
+        writer.write(" $title\n")
     }
 
     fun setHeaders(vararg headers: String) {
@@ -104,17 +107,17 @@ class ReportTableCreator(
             throw IllegalArgumentException("The table have $columnsCount columns.")
         }
 
-        stringBuilder.append("│")
+        writer.write("│")
         columnSizes.zip(data)
             .forEach { (columnSize, columnValue) ->
                 if (columnSize - 2 < columnValue.length) {
-                    stringBuilder.append(" ${columnValue.substring(0, columnSize - 2)}")
+                    writer.write(" ${columnValue.substring(0, columnSize - 2)}")
                 } else {
-                    stringBuilder.append(" ${columnValue.padEnd(columnSize - 2)}")
+                    writer.write(" ${columnValue.padEnd(columnSize - 2)}")
                 }
-                stringBuilder.append(" │")
+                writer.write(" │")
             }
-        stringBuilder.appendLine()
+        writer.write("\n")
     }
 
     private fun writeHeaderRow(vararg data: String) {
@@ -122,24 +125,24 @@ class ReportTableCreator(
             throw IllegalArgumentException("The table have $columnsCount columns.")
         }
 
-        stringBuilder.append("│")
+        writer.write("│")
         columnSizes.zip(data)
             .forEach { (columnSize, columnValue) ->
                 if (columnSize - 2 < columnValue.length) {
-                    stringBuilder.append(" ${columnValue.substring(0, columnSize - 2)} │")
+                    writer.write(" ${columnValue.substring(0, columnSize - 2)} │")
                 } else {
                     val gapSize = columnSize - columnValue.length
                     val gap = generateSequence { " " }
                         .take(gapSize / 2)
                         .joinToString(separator = "")
-                    stringBuilder.append("$gap$columnValue$gap")
+                    writer.write("$gap$columnValue$gap")
                     if (gapSize % 2 != 0) {
-                        stringBuilder.append(" ")
+                        writer.write(" ")
                     }
-                    stringBuilder.append("│")
+                    writer.write("│")
                 }
             }
-        stringBuilder.appendLine()
+        writer.write("\n")
     }
 
     private fun writeUpLine() {
@@ -157,17 +160,18 @@ class ReportTableCreator(
     }
 
     private fun writeLine(startSymbol: String, middleSymbol: String, endSymbol: String) {
-        stringBuilder.append(startSymbol)
+        writer.write(startSymbol)
         columnSizes.forEachIndexed { index, size ->
             if (index > 0) {
-                stringBuilder.append(middleSymbol)
+                writer.write(middleSymbol)
             }
             val line = generateSequence { "─" }
                 .take(size)
                 .joinToString(separator = "")
-            stringBuilder.append(line)
+            writer.write(line)
         }
-        stringBuilder.appendLine(endSymbol)
+
+        writer.write("$endSymbol\n")
     }
 }
 
