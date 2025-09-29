@@ -1,38 +1,5 @@
 package ru.kiseru.tablereportcreator
 
-fun main() {
-    val report = createReport {
-        setTitle("Some cool report")
-
-        createTable(11, 11, 11, 11, 11) {
-            setTitle("Some cool table header")
-
-            setHeaders("Column #1", "Column #2", "Column #3", "Column #4", "Column #5")
-
-            data(
-                listOf("Hello", "World", "How", "Are", "You"),
-            )
-        }
-
-        createTable(8, 14) {
-            setTitle("Employees phones")
-
-            setHeaders("Name", "Phone")
-
-            data(
-                listOf("Sam", "+79260243421"),
-                listOf("Max", "+79235453523"),
-                listOf("Anna", "+79138593428"),
-                listOf("Daniel", "+79132490565"),
-                listOf("Megan", "+79875490432"),
-                listOf("Julia", "+79859430534"),
-            )
-        }
-    }
-
-    println(report)
-}
-
 fun createReport(func: ReportCreator.() -> Unit): String {
     val reportCreator = ReportCreator()
     reportCreator.func()
