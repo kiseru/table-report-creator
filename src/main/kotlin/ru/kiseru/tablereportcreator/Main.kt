@@ -47,7 +47,7 @@ class ReportCreator {
 
     fun setTitle(title: String) {
         if (isTitleSet) {
-            throw IllegalStateException("Report header is already set")
+            throw IllegalStateException("Report title is already set")
         }
 
         isTitleSet = true
