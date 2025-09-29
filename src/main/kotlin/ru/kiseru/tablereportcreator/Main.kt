@@ -44,10 +44,15 @@ class ReportCreator {
     private val stringBuilder = StringBuilder()
 
     private var isTitleSet = false
+    private var isTablesCreated = false
 
     fun setTitle(title: String) {
         if (isTitleSet) {
             throw IllegalStateException("Report title is already set")
+        }
+
+        if (isTablesCreated) {
+            throw IllegalStateException("Cannot set report title after creating tables")
         }
 
         isTitleSet = true
@@ -55,6 +60,8 @@ class ReportCreator {
     }
 
     fun createTable(vararg columnSizes: Int, func: ReportTableCreator.() -> Unit) {
+        isTablesCreated = true
+
         if (isTitleSet) {
             stringBuilder.appendLine()
         }
