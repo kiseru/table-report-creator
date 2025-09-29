@@ -55,7 +55,10 @@ class ReportCreator {
     }
 
     fun createTable(vararg columnSizes: Int, func: ReportTableCreator.() -> Unit) {
-        stringBuilder.appendLine()
+        if (isTitleSet) {
+            stringBuilder.appendLine()
+        }
+
         val reportTableCreator = ReportTableCreator(stringBuilder, *columnSizes)
         reportTableCreator.func()
     }
