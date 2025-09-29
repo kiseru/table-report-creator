@@ -90,7 +90,6 @@ class ReportTableCreator(
 
         isTitleSet = true
         stringBuilder.appendLine(" $title")
-        writeUpLine()
     }
 
     fun setHeaders(vararg headers: String) {
@@ -103,6 +102,7 @@ class ReportTableCreator(
         }
 
         isHeaderSet = true
+        writeUpLine()
         writeHeaderRow(*headers)
         writeMiddleLine()
     }
