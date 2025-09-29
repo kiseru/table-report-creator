@@ -142,13 +142,12 @@ class MainTest {
         // when & then
         assertThatExceptionOfType(IllegalStateException::class.java)
             .isThrownBy {
-                val result = createReport {
+                createReport {
                     createTable(3, 3) {
                         setHeaders("A", "B")
                         setHeaders("A", "B")
                     }
                 }
-                println(result)
             }
             .withMessage("Table headers is already set")
     }
@@ -158,7 +157,7 @@ class MainTest {
         // when & then
         assertThatExceptionOfType(IllegalStateException::class.java)
             .isThrownBy {
-                val result = createReport {
+                createReport {
                     createTable(3, 3) {
                         data(
                             listOf("1", "2")
@@ -166,7 +165,6 @@ class MainTest {
                         setHeaders("A", "B")
                     }
                 }
-                println(result)
             }
             .withMessage("Table data is already set")
     }
@@ -176,7 +174,7 @@ class MainTest {
         // when & then
         assertThatExceptionOfType(IllegalStateException::class.java)
             .isThrownBy {
-                val result = createReport {
+                createReport {
                     createTable(3, 3) {
                         data(
                             listOf("1", "2")
@@ -186,7 +184,6 @@ class MainTest {
                         )
                     }
                 }
-                println(result)
             }
             .withMessage("Table data is already set")
     }
@@ -235,14 +232,13 @@ class MainTest {
         // when & then
         assertThatExceptionOfType(IllegalArgumentException::class.java)
             .isThrownBy {
-                val result = createReport {
+                createReport {
                     createTable(3, 3) {
                         data(
                             listOf("1", "2", "3")
                         )
                     }
                 }
-                println(result)
             }
             .withMessage("The table have 2 columns.")
     }
@@ -288,12 +284,11 @@ class MainTest {
         // when & then
         assertThatExceptionOfType(IllegalArgumentException::class.java)
             .isThrownBy {
-                val result = createReport {
+                createReport {
                     createTable(3, 3) {
                         setHeaders("A", "B", "C")
                     }
                 }
-                println(result)
             }
             .withMessage("The table have 2 columns.")
     }
