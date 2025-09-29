@@ -68,6 +68,7 @@ class ReportCreator {
 
         val reportTableCreator = ReportTableCreator(stringBuilder, *columnSizes)
         reportTableCreator.func()
+        reportTableCreator.writeDownLine()
     }
 
     fun createReport(): String =
@@ -114,7 +115,6 @@ class ReportTableCreator(
         isHeaderSet = true
         writeUpLine()
         writeHeaderRow(*headers)
-        writeMiddleLine()
     }
 
     fun data(vararg data: List<String>) {
@@ -122,9 +122,14 @@ class ReportTableCreator(
             throw IllegalStateException("Table data is already set")
         }
 
+        if (isHeaderSet) {
+            writeMiddleLine()
+        } else {
+            writeUpLine()
+        }
+
         isDataSet = true
         data.forEach(::writeRow)
-        writeDownLine()
     }
 
     private fun writeRow(data: List<String>) {
@@ -178,8 +183,10 @@ class ReportTableCreator(
         writeLine("├", "┼", "┤")
     }
 
-    private fun writeDownLine() {
-        writeLine("└", "┴", "┘")
+    fun writeDownLine() {
+        if (isHeaderSet || isDataSet) {
+            writeLine("└", "┴", "┘")
+        }
     }
 
     private fun writeLine(startSymbol: String, middleSymbol: String, endSymbol: String) {
